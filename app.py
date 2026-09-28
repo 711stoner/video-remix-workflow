@@ -206,6 +206,30 @@ def step_docs(project: Path, step: int):
 
     return docs, expected
 
+def primary_outputs(step: int, docs: list[dict]) -> list[dict]:
+    """Return the user-facing deliverables for a step.
+
+    QC / manifests remain in docs; this list is deliberately small and prominent.
+    """
+    wanted = {
+        1: {"制作单"},
+        2: {"原片内容文档"},
+        3: {"正式兼容原片"},
+        4: {"画面事实表"},
+        5: {"二创故事方案"},
+        6: {"二创解说稿", "最终配音稿"},
+        7: {"最终配音", "配音时间表"},
+        8: {"最终配音（连续试听）"},
+        9: {"画面时间线 MD", "画面时间线 JSON"},
+        10: {"正文音画检查版"},
+        11: {"包装混音检查版"},
+        12: {"检查通过版"},
+        13: {"桌面待检查版"},
+        14: {"硬盘正式输出"},
+    }.get(step, set())
+    return [d for d in docs if d.get("role") in wanted]
+
+
 def status_for(project: Path, step: int, docs, stage):
     if stage is not None and step <= stage:
         return "passed"
@@ -249,6 +273,7 @@ def project_payload(project_name: str):
             "status": status,
             "blocked_by": blocked_by,
             "docs": docs,
+            "outputs": [] if status == "blocked" else primary_outputs(n, docs),
             "expected_doc": str(expected) if expected else "",
         })
         previous_passed = status == "passed"
