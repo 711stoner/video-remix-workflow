@@ -166,6 +166,7 @@ def step_docs(project: Path, step: int):
     elif step == 8:
         p = first_named(files, names=["配音连续试听QC.md"])
         add(p, "连续试听 QC")
+        add(first_named(files, names=["最终配音.wav"]), "最终配音（连续试听）")
         expected = project / "配音" / "v1" / "配音连续试听QC.md"
     elif step == 9:
         add(first_named(files, names=["成片画面时间线.md"]), "画面时间线 MD")
