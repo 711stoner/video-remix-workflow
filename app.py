@@ -233,15 +233,25 @@ def project_payload(project_name: str):
         raise FileNotFoundError("项目不存在")
     wo = work_order_info(project)
     steps = []
+    previous_passed = True
     for n in range(15):
         docs, expected = step_docs(project, n)
+        raw_status = status_for(project, n, docs, wo["stage"])
+        blocked_by = None
+        if n > 0 and not previous_passed:
+            status = "blocked"
+            blocked_by = n - 1
+        else:
+            status = raw_status
         steps.append({
             "number": n,
             "title": STEP_TITLES[n],
-            "status": status_for(project, n, docs, wo["stage"]),
+            "status": status,
+            "blocked_by": blocked_by,
             "docs": docs,
             "expected_doc": str(expected) if expected else "",
         })
+        previous_passed = status == "passed"
     return {
         "name": project.name,
         "prefix": project_prefix(project.name),
