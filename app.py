@@ -212,7 +212,16 @@ def status_for(project: Path, step: int, docs, stage):
     phrases = PASS_PHRASES.get(step, [])
     if phrases:
         all_text = "\n".join(read_text(Path(d["path"])) for d in docs if Path(d["path"]).suffix.lower() in {".md", ".txt", ".json"})
-        if all(x in all_text for x in phrases):
+        def gate_is_yes(phrase: str) -> bool:
+            for raw_line in all_text.splitlines():
+                line = re.sub(r"[*_`#]", "", raw_line)
+                if phrase not in line:
+                    continue
+                tail = line.split(phrase, 1)[1]
+                if re.search(r"[：:]\s*是(?:\s|$|[，。；])", tail):
+                    return True
+            return False
+        if all(gate_is_yes(x) for x in phrases):
             return "passed"
     if docs:
         return "has_files"
